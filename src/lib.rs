@@ -4,15 +4,14 @@
 extern crate iron;
 extern crate serialize;
 
-//use iron::{Iron, Ingot, Furnace, Alloy, Request, Response, ServerT};
 use iron::{Ingot, Alloy, Request, Response};
-use iron::ingot::{Status, Continue, Unwind};
+use iron::ingot::{Status, Continue};
 
 use serialize::json;
-//use serialize::json::{List, Object};
+use serialize::json::Json;
 
 #[deriving(Clone)]
-struct Parsed(json::Json);
+struct Parsed(Json);
 
 #[deriving(Clone)]
 pub struct BodyParser;
@@ -30,7 +29,7 @@ impl<Rq: Request, Rs: Response> Ingot<Rq, Rs> for BodyParser {
     }
 }
 
-fn parse_body(x:&str) -> json::Json {
+fn parse_body(x:&str) -> Json {
     let json_object = json::from_str(x.as_slice());
     json_object.clone().unwrap()
 }
