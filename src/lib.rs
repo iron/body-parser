@@ -18,19 +18,23 @@ struct Parsed(Json);
 pub struct BodyParser;
 
 impl BodyParser {
-    fn new() -> BodyParser {
+    pub fn new() -> BodyParser {
         BodyParser
     }
 }
 
 impl<Rq: Request, Rs: Response> Ingot<Rq, Rs> for BodyParser {
     fn enter(&mut self, _rq: &mut Rq, _rs: &mut Rs, alloy: &mut Alloy) -> Status {
-        alloy.insert::<Parsed>(Parsed(parse_body(_rq.body())));
+        if _rq.body().len() != 0 {
+            println!("its not 0")
+            alloy.insert::<Parsed>(Parsed(parse_body(_rq.body())));
+        }
         Continue
     }
 }
 
 fn parse_body(x:&str) -> Json {
     let json_object = json::from_str(x.as_slice());
-    json_object.clone().unwrap()
+    let obj = json_object.clone().unwrap();
+    obj
 }
