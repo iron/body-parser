@@ -1,3 +1,4 @@
+//! Body Parser middleware for Iron
 #![crate_id = "bodyparser"]
 #![license = "MIT"]
 
