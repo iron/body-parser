@@ -24,18 +24,18 @@ impl BodyParser {
 }
 
 impl Middleware for BodyParser {
-    fn enter(&mut self, _req: &mut Request, res: &mut Response, alloy: &mut Alloy) -> Status {
-        println!("Welcome to Body Parser")
-        if _req.body.len() != 0 {
-            println!("its not 0")
-            alloy.insert::<Parsed>(Parsed(parse_body(_req.body.clone())));
+    fn enter(&mut self, req: &mut Request, res: &mut Response, alloy: &mut Alloy) -> Status {
+        if req.body.len() != 0 {
+            let parse = json::from_str(req.body.as_slice());
+            match parse {
+                Ok(e) => {
+                    alloy.insert::<Parsed>(Parsed(e));
+                },
+                Err(e) => {
+                    return Continue;
+                }
+            }
         }
         Continue
     }
-}
-
-fn parse_body(x:String) -> Json {
-    let json_object = json::from_str(x.clone().as_slice());
-    let obj = json_object.clone().unwrap();
-    obj
 }
