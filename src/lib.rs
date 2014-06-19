@@ -5,8 +5,8 @@
 extern crate iron;
 extern crate serialize;
 
-use iron::{Ingot, Alloy, Request, Response};
-use iron::ingot::{Status, Continue};
+use iron::{Request, Response, Middleware, Alloy};
+use iron::middleware::{Status, Continue, Unwind};
 
 use serialize::json;
 use serialize::json::Json;
@@ -23,18 +23,19 @@ impl BodyParser {
     }
 }
 
-impl<Rq: Request, Rs: Response> Ingot<Rq, Rs> for BodyParser {
-    fn enter(&mut self, _rq: &mut Rq, _rs: &mut Rs, alloy: &mut Alloy) -> Status {
-        if _rq.body().len() != 0 {
+impl Middleware for BodyParser {
+    fn enter(&mut self, _req: &mut Request, res: &mut Response, alloy: &mut Alloy) -> Status {
+        println!("Welcome to Body Parser")
+        if _req.body.len() != 0 {
             println!("its not 0")
-            alloy.insert::<Parsed>(Parsed(parse_body(_rq.body())));
+            alloy.insert::<Parsed>(Parsed(parse_body(_req.body.clone())));
         }
         Continue
     }
 }
 
-fn parse_body(x:&str) -> Json {
-    let json_object = json::from_str(x.as_slice());
+fn parse_body(x:String) -> Json {
+    let json_object = json::from_str(x.clone().as_slice());
     let obj = json_object.clone().unwrap();
     obj
 }
