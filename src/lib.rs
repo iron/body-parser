@@ -25,13 +25,13 @@ impl BodyParser {
 
 impl Middleware for BodyParser {
     fn enter(&mut self, req: &mut Request, res: &mut Response, alloy: &mut Alloy) -> Status {
-        if req.body.len() != 0 {
+        if !req.body.is_empty() {
             let parse = json::from_str(req.body.as_slice());
             match parse {
-                Ok(e) => {
-                    alloy.insert::<Parsed>(Parsed(e));
+                Ok(k) => {
+                    alloy.insert::<Parsed>(Parsed(k));
                 },
-                Err(e) => {
+                Err(k) => {
                     return Continue;
                 }
             }
