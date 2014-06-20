@@ -28,10 +28,10 @@ impl Middleware for BodyParser {
         if !req.body.is_empty() {
             let parse = json::from_str(req.body.as_slice());
             match parse {
-                Ok(k) => {
-                    alloy.insert::<Parsed>(Parsed(k));
+                Ok(parsed) => {
+                    alloy.insert::<Parsed>(Parsed(parsed));
                 },
-                Err(k) => {
+                Err(_) => {
                     return Continue;
                 }
             }
