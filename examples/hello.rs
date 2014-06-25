@@ -3,7 +3,7 @@ extern crate bodyparser;
 
 use std::io::net::ip::Ipv4Addr;
 
-use iron::{Iron, ServerT, Request, Response, Alloy};
+use iron::{Iron, ServerT, Request, Response, Alloy, Chain};
 
 use bodyparser::{BodyParser, Parsed};
 
@@ -23,7 +23,7 @@ fn log_json(_: &mut Request, _: &mut Response, alloy: &mut Alloy) {
 // and check out the printed json in your terminal.
 fn main() {
     let mut server: ServerT = Iron::new();
-    server.link(BodyParser::new());
-    server.link(log_json);
+    server.chain.link(BodyParser::new());
+    server.chain.link(log_json);
     server.listen(Ipv4Addr(127, 0, 0, 1), 3000);
 }
