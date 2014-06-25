@@ -1,4 +1,6 @@
 //! Body Parser middleware for Iron
+//! 
+//! This middleware focuses on parsing incoming data from client requests.
 #![crate_id = "bodyparser"]
 #![license = "MIT"]
 
@@ -11,13 +13,15 @@ use iron::middleware::{Status, Continue, Unwind};
 use serialize::json;
 use serialize::json::Json;
 
-/// The Parsed type holds a Json object that Body Parser will populate.
+/// The Parsed type holds the Json object that is parsed from incoming data.
 #[deriving(Clone)]
 pub struct Parsed(pub Json);
 
 #[deriving(Clone)]
 pub struct BodyParser;
 
+/// Using `pub fn new() -> BodyParser` will create a new instance of BodyParser,
+/// which can then be `link`ed to a `Chain`.
 impl BodyParser {
     pub fn new() -> BodyParser {
         BodyParser
