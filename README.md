@@ -7,17 +7,14 @@ body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?b
 
 ```rust
 extern crate iron;
-extern crate http;
+extern crate bodyparser;
 use iron::{Iron, ServerT, Chain, Request, Response, Alloy};
+use bodyparser::{BodyParser, Parsed};
 
 fn main() {
     let mut server: ServerT = Iron::new();
-    server.chain.link(hello_world); // Add middleware to the server's stack
+    server.chain.link(Bodyparser::new()); // Add middleware to the server's stack
     server.listen(::std::io::net::ip::Ipv4Addr(127, 0, 0, 1), 3000);
-}
-
-fn hello_world(_: &mut Request, res: &mut Response, _: &mut Alloy) {
-    res.serve(::http::Ok, "Hello, world!");
 }
 ```
 
@@ -25,8 +22,10 @@ fn hello_world(_: &mut Request, res: &mut Response, _: &mut Alloy) {
 
 body-parser is a part of Iron's [core bundle](https://github.com/iron/core).
 
-- ...
-- ...
+- The middleware performs JSON parsing using native functionality bundled in the standard
+  library. 
+- Iron functionality is packed in middleware, so link BodyParser to the chain
+  just like all other middleware.
 
 ## Installation
 
