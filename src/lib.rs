@@ -8,7 +8,7 @@ extern crate iron;
 extern crate serialize;
 
 use iron::{Request, Response, Middleware, Alloy};
-use iron::middleware::{Status, Continue, Unwind};
+use iron::middleware::{Status, Continue};
 
 use serialize::json;
 use serialize::json::Json;
@@ -29,7 +29,7 @@ impl BodyParser {
 }
 
 impl Middleware for BodyParser {
-    fn enter(&mut self, req: &mut Request, res: &mut Response, alloy: &mut Alloy) -> Status {
+    fn enter(&mut self, req: &mut Request, _: &mut Response, alloy: &mut Alloy) -> Status {
         if !req.body.is_empty() {
             match json::from_str(req.body.as_slice()) {
                 Ok(parsed) => {
