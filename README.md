@@ -11,9 +11,18 @@ extern crate bodyparser;
 use iron::{Iron, ServerT, Chain, Request, Response, Alloy};
 use bodyparser::{BodyParser, Parsed};
 
+fn log_json(_: &mut Request, _: &mut Response, alloy: &mut Alloy) {
+    let json = alloy.find::<Parsed>();
+    match json {
+        Some(&Parsed(ref parsed)) => println!("Parsed Json:\n {}", parsed),
+        None => ()
+    }
+}
+
 fn main() {
     let mut server: ServerT = Iron::new();
     server.chain.link(Bodyparser::new()); // Add middleware to the server's stack
+    server.chain.link(log_json);
     server.listen(::std::io::net::ip::Ipv4Addr(127, 0, 0, 1), 3000);
 }
 ```
@@ -22,10 +31,8 @@ fn main() {
 
 body-parser is a part of Iron's [core bundle](https://github.com/iron/core).
 
-- The middleware performs JSON parsing using native functionality bundled in the standard
+- Perform JSON parsing using native functionality bundled in the standard
   library. 
-- Iron functionality is packed in middleware, so link BodyParser to the chain
-  just like all other middleware.
 
 ## Installation
 
