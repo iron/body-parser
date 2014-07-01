@@ -1,6 +1,9 @@
 //! Body Parser middleware for Iron
-//! 
-//! This middleware focuses on parsing incoming data from client requests.
+//!
+//! This middleware parses incoming JSON data from client requests. On an empy
+//! request, or on malformed data, the chain is not unwound, but rather
+//! nothing is inserted into the `Alloy`. Middleware further down the chain
+//! must take care to handle this robustly.
 #![crate_id = "bodyparser"]
 #![license = "MIT"]
 
@@ -13,16 +16,15 @@ use iron::middleware::{Status, Continue, Unwind};
 use serialize::json;
 use serialize::json::Json;
 
-/// The Parsed type holds the Json object that is parsed from incoming data.
+/// The Parsed type holds the Json object that was parsed from incoming data.
 #[deriving(Clone)]
 pub struct Parsed(pub Json);
 
 #[deriving(Clone)]
 pub struct BodyParser;
 
-/// Using `pub fn new() -> BodyParser` will create a new instance of BodyParser,
-/// which can then be `link`ed to a `Chain`.
 impl BodyParser {
+    /// Create a new `BodyParse`, for linking into a `Chain`
     pub fn new() -> BodyParser {
         BodyParser
     }
