@@ -11,8 +11,7 @@
 extern crate iron;
 extern crate serialize;
 
-use iron::{Request, Response, Middleware, Alloy};
-use iron::middleware::{Status, Continue};
+use iron::{Request, Response, Middleware, Alloy, Status, Continue};
 
 use serialize::json;
 use serialize::json::Json;
