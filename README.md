@@ -8,7 +8,7 @@ body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?b
 ```rust
 extern crate iron;
 extern crate bodyparser;
-use iron::{Iron, ServerT, Chain, Request, Response, Alloy};
+use iron::{Iron, Server, Chain, Request, Response, Alloy};
 use bodyparser::{BodyParser, Parsed};
 
 fn log_json(_: &mut Request, _: &mut Response, alloy: &mut Alloy) {
@@ -20,7 +20,7 @@ fn log_json(_: &mut Request, _: &mut Response, alloy: &mut Alloy) {
 }
 
 fn main() {
-    let mut server: ServerT = Iron::new();
+    let mut server: Server = Iron::new();
     server.chain.link(Bodyparser::new()); // Add middleware to the server's stack
     server.chain.link(log_json);
     server.listen(::std::io::net::ip::Ipv4Addr(127, 0, 0, 1), 3000);
