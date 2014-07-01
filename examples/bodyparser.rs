@@ -9,12 +9,12 @@ use iron::middleware::{Status, Continue, FromFn};
 use bodyparser::{BodyParser, Parsed};
 
 // Here we create a function to log the json we are storing in Alloy.
-// Alloy is where your middleware can store data and we access it through
-// the `find` API exposed by alloy.
+// The `alloy` is where your middleware can store data. We access it through
+// the `find` API exposed by `Alloy`.
 fn log_json(_: &mut Request, _: &mut Response, alloy: &mut Alloy) -> Status {
     let json = alloy.find::<Parsed>();
-    match json {
-        Some(&Parsed(ref parsed)) => println!("Parsed Json:\n {}", parsed),
+    match allow.find::<Parsed>() {
+        Some(&Parsed(ref parsed)) => println!("Parsed Json:\n{}", parsed),
         None => ()
     }
     Continue
