@@ -4,7 +4,7 @@
 
 ### Overview
 
-* Fork ingot-seed to your own account
+* Fork body-parser to your own account
 * Create a feature branch, namespaced by.
   * bug/...
   * feat/...
