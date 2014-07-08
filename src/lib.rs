@@ -5,7 +5,7 @@
 //! request, or on malformed data, the chain is not unwound, but rather
 //! nothing is inserted into the `Alloy`. Middleware further down the chain
 //! must take care to handle this robustly.
-#![crate_id = "bodyparser"]
+#![crate_name = "bodyparser"]
 #![license = "MIT"]
 
 extern crate iron;
