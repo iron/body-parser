@@ -3,8 +3,6 @@
 name = "bodyparser"
 authors = ["Patrick Tran <patrick.tran06@gmail.com>"]
 version = "0.1.0"
-readme = "README.md"
-tags = ["web", "server", "middleware", "iron", "core", "body", "parser", "bodyparser", "body-parser"]
 
 [[lib]]
 

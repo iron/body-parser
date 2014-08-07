@@ -5,13 +5,12 @@
 //! request, or on malformed data, the chain is not unwound, but rather
 //! nothing is inserted into the `Alloy`. Middleware further down the chain
 //! must take care to handle this robustly.
-#![crate_id = "bodyparser"]
 #![license = "MIT"]
 
 extern crate iron;
 extern crate serialize;
 
-use iron::{Request, Response, Middleware, Alloy, Status, Continue};
+use iron::{Request, Response, Middleware, Status, Continue};
 
 use serialize::json;
 use serialize::json::Json;
@@ -31,11 +30,11 @@ impl BodyParser {
 }
 
 impl Middleware for BodyParser {
-    fn enter(&mut self, req: &mut Request, _ : &mut Response, alloy: &mut Alloy) -> Status {
+    fn enter(&mut self, req: &mut Request, _ : &mut Response) -> Status {
         if !req.body.is_empty() {
             match json::from_str(req.body.as_slice()) {
                 Ok(parsed) => {
-                    alloy.insert::<Parsed>(Parsed(parsed));
+                    req.alloy.insert::<Parsed>(Parsed(parsed));
                 },
                 Err(_) => {
                     return Continue;
