@@ -3,14 +3,14 @@ extern crate bodyparser;
 
 use std::io::net::ip::Ipv4Addr;
 
-use iron::{Iron, Server, Request, Response, Alloy, Chain, Status, Continue, FromFn};
+use iron::{Iron, Server, Request, Response, Chain, Status, Continue, FromFn};
 use bodyparser::{BodyParser, Parsed};
 
 // Here we create a function to log the json we are storing in Alloy.
 // The `alloy` is where your middleware can store data. We access it through
 // the `find` API exposed by `Alloy`.
-fn log_json(_: &mut Request, _: &mut Response, alloy: &mut Alloy) -> Status {
-    match alloy.find::<Parsed>() {
+fn log_json(req: &mut Request, _: &mut Response) -> Status {
+    match req.alloy.find::<Parsed>() {
         Some(&Parsed(ref parsed)) => println!("Parsed Json:\n{}", parsed),
         None => ()
     }
