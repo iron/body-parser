@@ -10,7 +10,7 @@ use bodyparser::{BodyParser, Parsed};
 // The `alloy` is where your middleware can store data. We access it through
 // the `find` API exposed by `Alloy`.
 fn log_json(req: &mut Request, _: &mut Response) -> Status {
-    match req.alloy.find::<Parsed>() {
+    match req.extensions.find::<Parsed>() {
         Some(&Parsed(ref parsed)) => println!("Parsed Json:\n{}", parsed),
         None => ()
     }

@@ -8,11 +8,11 @@ body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?b
 ```rust
 extern crate iron;
 extern crate bodyparser;
-use iron::{Iron, Server, Chain, Request, Response, Alloy, FromFn, Status, Unwind};
+use iron::{Iron, Server, Chain, Request, Response, FromFn, Status, Unwind};
 use bodyparser::{BodyParser, Parsed};
 
-fn log_json(_: &mut Request, _: &mut Response, alloy: &mut Alloy) -> Status {
-    let json = alloy.find::<Parsed>();
+fn log_json(req: &mut Request, _: &mut Response) -> Status {
+    let json = req.extensions.find::<Parsed>();
     match json {
         Some(&Parsed(ref parsed)) => println!("Parsed Json:\n{}", parsed),
         None => (),

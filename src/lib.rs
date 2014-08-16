@@ -34,7 +34,7 @@ impl Middleware for BodyParser {
         if !req.body.is_empty() {
             match json::from_str(req.body.as_slice()) {
                 Ok(parsed) => {
-                    req.alloy.insert::<Parsed>(Parsed(parsed));
+                    req.extensions.insert::<Parsed>(Parsed(parsed));
                 },
                 Err(_) => {
                     return Continue;
