@@ -1,13 +1,9 @@
 [package]
 
 name = "bodyparser"
-authors = ["Patrick Tran <patrick.tran06@gmail.com>"]
+authors = ["Patrick Tran <patrick.tran06@gmail.com>",
+           "Jonathan Reem <jonathan.reem@gmail.com>"]
 version = "0.1.0"
-
-[[lib]]
-
-name = "bodyparser"
-path = "src/lib.rs"
 
 [dependencies.iron]
 
