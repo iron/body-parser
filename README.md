@@ -8,23 +8,22 @@ body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?b
 ```rust
 extern crate iron;
 extern crate bodyparser;
-use iron::{Iron, Server, Chain, Request, Response, FromFn, Status, Unwind};
-use bodyparser::{BodyParser, Parsed};
 
-fn log_json(req: &mut Request, _: &mut Response) -> Status {
-    let json = req.extensions.find::<Parsed>();
-    match json {
-        Some(&Parsed(ref parsed)) => println!("Parsed Json:\n{}", parsed),
-        None => (),
-    }
-    Unwind
+use std::io::net::ip::Ipv4Addr;
+
+use iron::{Iron, Request, Response, IronResult, Plugin, status};
+use bodyparser::BodyParser;
+
+fn log_json(req: &mut Request) -> IronResult<Response> {
+    req.get::<BodyParser>().map(|parsed| println!("Parsed Json:\n{}", parsed));
+    Ok(Response::with(status::Ok, ""))
 }
 
+// With fn main, you now have a running server at port 3000!
+// `curl -i "127.0.0.1:3000/" -H "application/json" -d '{"A":"1","B":"2"}'`
+// and check out the printed json in your terminal.
 fn main() {
-    let mut server: Server = Iron::new();
-    server.chain.link(BodyParser::new()); // Add middleware to the server's stack
-    server.chain.link(FromFn::new(log_json));
-    server.listen(::std::io::net::ip::Ipv4Addr(127, 0, 0, 1), 3000);
+    Iron::new(log_json).listen(Ipv4Addr(127, 0, 0, 1), 3000);
 }
 ```
 
