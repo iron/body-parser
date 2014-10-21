@@ -8,14 +8,26 @@ body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?b
 ```rust
 extern crate iron;
 extern crate bodyparser;
+extern crate serialize;
 
 use std::io::net::ip::Ipv4Addr;
 
 use iron::{Iron, Request, Response, IronResult, Plugin, status};
 use bodyparser::BodyParser;
 
+#[deriving(Clone)]
+#[deriving(Decodable)]
+#[deriving(Show)]
+struct MyStructure {
+    myparam: String,
+    optionalparam: Option<String>,
+}
+
 fn log_json(req: &mut Request) -> IronResult<Response> {
-    req.get::<BodyParser>().map(|parsed| println!("Parsed Json:\n{}", parsed));
+    match req.get::<BodyParser<MyStructure>>() {
+        Some(parsed) => println!("Parsed Json:\n{}", parsed),
+        None => println!("could not parse"),
+    }
     Ok(Response::with(status::Ok, ""))
 }
 

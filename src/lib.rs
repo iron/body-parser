@@ -18,18 +18,31 @@ use iron::typemap::Assoc;
 
 use plugin::{PluginFor, Phantom};
 
-use serialize::json;
-use serialize::json::Json;
+use serialize::{json, Decodable};
+use serialize::json::{Decoder, DecoderError};
+use std::str::from_utf8;
 
 #[deriving(Clone)]
-pub struct BodyParser;
+pub struct BodyParser<T: Decodable<Decoder, DecoderError>>;
 
-impl Assoc<Json> for BodyParser {}
+impl<T: 'static + Decodable<Decoder, DecoderError>> Assoc<T> for BodyParser<T> {}
 
-impl PluginFor<Request, Json> for BodyParser {
-    fn eval(req: &Request, _: Phantom<BodyParser>) -> Option<Json> {
+impl<T: Decodable<Decoder, DecoderError>> PluginFor<Request, T> for BodyParser<T> {
+    fn eval(req: &mut Request, _: Phantom<BodyParser<T>>) -> Option<T> {
         if !req.body.is_empty() {
-            json::from_str(req.body.as_slice()).ok()
+            let body = match from_utf8(req.body.as_slice()) {
+                Some(body) => body,
+                None => {return None;},
+            };
+            let json_object = match json::from_str(body).ok() {
+                Some(json_object) => json_object,
+                None => {return None;},
+            };
+            let mut decoder = json::Decoder::new(json_object);
+            match Decodable::decode(&mut decoder) {
+                Ok(t) => Some(t),
+                Err(_) => None,
+            }
         } else {
             None
         }
