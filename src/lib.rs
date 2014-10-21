@@ -15,21 +15,21 @@ use iron::typemap::Assoc;
 
 use plugin::{PluginFor, Phantom};
 
-use serialize::json;
-use serialize::json::Json;
-
+use serialize::{json, Decodable};
+use serialize::json::{Decoder, DecoderError};
 use std::str;
 
 #[deriving(Clone)]
-pub struct BodyParser;
+pub struct BodyParser<T: Decodable<Decoder, DecoderError>>;
 
-impl Assoc<Json> for BodyParser {}
+impl<T: 'static + Decodable<Decoder, DecoderError>> Assoc<T> for BodyParser<T> {}
 
-impl PluginFor<Request, Json> for BodyParser {
-    fn eval(req: &mut Request, _: Phantom<BodyParser>) -> Option<Json> {
+impl<T: Decodable<Decoder, DecoderError>> PluginFor<Request, T> for BodyParser<T> {
+    fn eval(req: &mut Request, _: Phantom<BodyParser<T>>) -> Option<T> {
         if !req.body.is_empty() {
             str::from_utf8(req.body.as_slice())
                 .and_then(|body| json::from_str(body).ok())
+                .and_then(|json| Decodable::decode(&mut json::Decoder::new(json)).ok())
         } else {
             None
         }
