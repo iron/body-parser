@@ -1,13 +1,26 @@
 extern crate iron;
 extern crate bodyparser;
+extern crate serialize;
 
 use std::io::net::ip::Ipv4Addr;
 
 use iron::{Iron, Request, Response, IronResult, Plugin, status};
 use bodyparser::BodyParser;
 
+#[deriving(Decodable)]
+#[deriving(Clone)]
+#[deriving(Show)]
+struct JsonParams {
+    name: String,
+    age: Option<i8>,
+}
+
 fn log_json(req: &mut Request) -> IronResult<Response> {
-    req.get::<BodyParser>().map(|parsed| println!("Parsed Json:\n{}", parsed));
+    let parsed = req.get::<BodyParser<JsonParams>>();
+    match parsed {
+        Some(params) => println!("Parsed json:\n{}", params),
+        None => println!("Invalid or no json!"),
+    }
     Ok(Response::with(status::Ok, ""))
 }
 
@@ -17,3 +30,4 @@ fn log_json(req: &mut Request) -> IronResult<Response> {
 fn main() {
     Iron::new(log_json).listen(Ipv4Addr(127, 0, 0, 1), 3000);
 }
+
