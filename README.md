@@ -19,8 +19,8 @@ use bodyparser::BodyParser;
 #[deriving(Decodable)]
 #[deriving(Show)]
 struct MyStructure {
-    myparam: String,
-    optionalparam: Option<String>,
+    A: String,
+    B: Option<String>,
 }
 
 fn log_json(req: &mut Request) -> IronResult<Response> {
