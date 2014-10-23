@@ -2,12 +2,9 @@
 #![feature(default_type_params)]
 #![license = "MIT"]
 
-//! Body Parser middleware for Iron
+//! Body Parser Plugin for Iron
 //!
-//! This middleware parses incoming JSON data from client requests. On an empy
-//! request, or on malformed data, the chain is not unwound, but rather
-//! nothing is inserted into the `Alloy`. Middleware further down the chain
-//! must take care to handle this robustly.
+//! This plugin parses JSON out of an incoming Request.
 
 extern crate iron;
 extern crate serialize;
@@ -21,15 +18,18 @@ use plugin::{PluginFor, Phantom};
 use serialize::json;
 use serialize::json::Json;
 
+use std::str;
+
 #[deriving(Clone)]
 pub struct BodyParser;
 
 impl Assoc<Json> for BodyParser {}
 
 impl PluginFor<Request, Json> for BodyParser {
-    fn eval(req: &Request, _: Phantom<BodyParser>) -> Option<Json> {
+    fn eval(req: &mut Request, _: Phantom<BodyParser>) -> Option<Json> {
         if !req.body.is_empty() {
-            json::from_str(req.body.as_slice()).ok()
+            str::from_utf8(req.body.as_slice())
+                .and_then(|body| json::from_str(body).ok())
         } else {
             None
         }
