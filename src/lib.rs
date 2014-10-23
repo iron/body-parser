@@ -20,7 +20,7 @@ use plugin::{PluginFor, Phantom};
 
 use serialize::{json, Decodable};
 use serialize::json::{Decoder, DecoderError};
-use std::str::from_utf8;
+use std::str;
 
 #[deriving(Clone)]
 pub struct BodyParser<T: Decodable<Decoder, DecoderError>>;
@@ -30,19 +30,9 @@ impl<T: 'static + Decodable<Decoder, DecoderError>> Assoc<T> for BodyParser<T> {
 impl<T: Decodable<Decoder, DecoderError>> PluginFor<Request, T> for BodyParser<T> {
     fn eval(req: &mut Request, _: Phantom<BodyParser<T>>) -> Option<T> {
         if !req.body.is_empty() {
-            let body = match from_utf8(req.body.as_slice()) {
-                Some(body) => body,
-                None => {return None;},
-            };
-            let json_object = match json::from_str(body).ok() {
-                Some(json_object) => json_object,
-                None => {return None;},
-            };
-            let mut decoder = json::Decoder::new(json_object);
-            match Decodable::decode(&mut decoder) {
-                Ok(t) => Some(t),
-                Err(_) => None,
-            }
+            str::from_utf8(req.body.as_slice())
+                .and_then(|body| json::from_str(body).ok())
+                .and_then(|json| Decodable::decode(&mut json::Decoder::new(json)).ok())
         } else {
             None
         }
