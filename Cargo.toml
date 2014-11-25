@@ -1,11 +1,14 @@
 [package]
 
 name = "bodyparser"
+version = "0.0.1"
+license = "MIT"
+description = "Body parsing middleware for Iron."
+repository = "https://github.com/iron/body-parser"
+documentation = "http://ironframework.io/doc/bodyparser/index.html"
 authors = ["Patrick Tran <patrick.tran06@gmail.com>",
            "Jonathan Reem <jonathan.reem@gmail.com>"]
-version = "0.1.0"
 
-[dependencies.iron]
-
-git = "https://github.com/iron/iron.git"
+[dependencies]
+iron = "*"
 

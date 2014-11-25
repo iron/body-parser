@@ -1,15 +1,14 @@
+#![feature(globs)]
 extern crate iron;
 extern crate bodyparser;
 extern crate serialize;
 
-use std::io::net::ip::Ipv4Addr;
-
-use iron::{Iron, Request, Response, IronResult, Plugin, status};
+use iron::prelude::*;
+use iron::status;
+use iron::response::modifiers::{Body, Status};
 use bodyparser::BodyParser;
 
-#[deriving(Decodable)]
-#[deriving(Clone)]
-#[deriving(Show)]
+#[deriving(Decodable, Clone, Show)]
 struct JsonParams {
     name: String,
     age: Option<i8>,
@@ -21,13 +20,12 @@ fn log_json(req: &mut Request) -> IronResult<Response> {
         Some(params) => println!("Parsed json:\n{}", params),
         None => println!("Invalid or no json!"),
     }
-    Ok(Response::with(status::Ok, ""))
+    Ok(Response::new().set(Status(status::Ok)))
 }
 
-// With fn main, you now have a running server at port 3000!
-// `curl -i "127.0.0.1:3000/" -H "application/json" -d '{"A":"1","B":"2"}'`
+// `curl -i "localhost:3000/" -H "application/json" -d '{"name":"jason","age":"2"}'`
 // and check out the printed json in your terminal.
 fn main() {
-    Iron::new(log_json).listen(Ipv4Addr(127, 0, 0, 1), 3000);
+    Iron::new(log_json).listen("localhost:3000").unwrap();
 }
 
