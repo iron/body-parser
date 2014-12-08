@@ -1,5 +1,4 @@
 #![crate_name = "bodyparser"]
-#![license = "MIT"]
 #![feature(default_type_params)]
 
 //! Body Parser Plugin for Iron
