@@ -10,5 +10,7 @@ authors = ["Patrick Tran <patrick.tran06@gmail.com>",
            "Jonathan Reem <jonathan.reem@gmail.com>"]
 
 [dependencies]
-iron = "*"
 
+iron = "*"
+plugin = "*"
+typemap = "*"
