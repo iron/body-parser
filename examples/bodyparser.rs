@@ -1,31 +1,25 @@
-#![feature(globs)]
 extern crate iron;
 extern crate bodyparser;
-extern crate serialize;
+extern crate plugin;
 
-use iron::prelude::*;
+use plugin::Pluggable;
+
 use iron::status;
-use iron::response::modifiers::{Body, Status};
-use bodyparser::BodyParser;
 
-#[deriving(Decodable, Clone, Show)]
-struct JsonParams {
-    name: String,
-    age: Option<i8>,
-}
-
-fn log_json(req: &mut Request) -> IronResult<Response> {
-    let parsed = req.get::<BodyParser<JsonParams>>();
+fn log_body(req: &mut iron::Request) -> iron::IronResult<iron::Response> {
+    let parsed = req.get::<bodyparser::BodyReader>();
     match parsed {
-        Some(params) => println!("Parsed json:\n{}", params),
-        None => println!("Invalid or no json!"),
+        Ok(Some(body)) => println!("Parsed body:\n{}", body),
+        Ok(None) => println!("No body"),
+        Err(err) => println!("Error: {:?}", err)
     }
-    Ok(Response::new().set(Status(status::Ok)))
+    Ok(iron::Response::with(status::Ok))
 }
 
 // `curl -i "localhost:3000/" -H "application/json" -d '{"name":"jason","age":"2"}'`
 // and check out the printed json in your terminal.
 fn main() {
-    Iron::new(log_json).listen("localhost:3000").unwrap();
+    let chain = iron::Chain::new(log_body);
+    iron::Iron::new(chain).listen("localhost:3000").unwrap();
 }
 

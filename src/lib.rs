@@ -1,37 +1,79 @@
 #![crate_name = "bodyparser"]
-#![feature(default_type_params)]
+#![feature(core)]
+#![feature(io)]
 
 //! Body Parser Plugin for Iron
 //!
 //! This plugin parses JSON out of an incoming Request.
 
 extern crate iron;
-extern crate serialize;
+extern crate "rustc-serialize" as rustc_serialize;
 extern crate plugin;
 
-use iron::Request;
-use iron::typemap::Assoc;
+use iron::mime;
+use iron::prelude::*;
+use iron::headers;
+use iron::typemap::{Key};
+use std::old_io::ByRefReader;
 
-use plugin::{PluginFor, Phantom};
+pub use self::errors::{BodyError};
+pub use self::limit_reader::{LimitReader};
 
-use serialize::{json, Decodable};
-use serialize::json::{Decoder, DecoderError};
-use std::str;
+mod errors;
+mod limit_reader;
 
-#[deriving(Clone)]
-pub struct BodyParser<T: Decodable<Decoder, DecoderError>>;
-
-impl<T: 'static + Decodable<Decoder, DecoderError>> Assoc<T> for BodyParser<T> {}
-
-impl<T: Decodable<Decoder, DecoderError>> PluginFor<Request, T> for BodyParser<T> {
-    fn eval(req: &mut Request, _: Phantom<BodyParser<T>>) -> Option<T> {
-        if !req.body.is_empty() {
-            str::from_utf8(req.body.as_slice())
-                .and_then(|body| json::from_str(body).ok())
-                .and_then(|json| Decodable::decode(&mut json::Decoder::new(json)).ok())
-        } else {
-            None
-        }
+fn read_body_as_utf8(req: &mut Request, limit: usize) -> Result<String, errors::BodyError> {
+    match LimitReader::new(req.body.by_ref(), limit).read_to_end() {
+        Ok(bytes) => {
+             match String::from_utf8(bytes) {
+                Ok(e) => Ok(e),
+                Err(err) => Err(errors::BodyError {
+                    detail: "Invalid UTF-8 sequence".to_string(),
+                    cause: errors::BodyErrorCause::Utf8Error(err.utf8_error())
+                })
+            }
+        },
+        Err(err) => Err(errors::BodyError {
+            detail: "Can't read request body".to_string(),
+            cause: errors::BodyErrorCause::IoError(err)
+        })
     }
 }
 
+/// Use this key to modify the default body limit.
+pub struct BodyMaxLength;
+impl Key for BodyMaxLength {
+    type Value = usize;
+}
+
+/// BodyReader is a plugin to read a request body into UTF-8 String.
+/// Doesn't read `multipart/form-data`.
+pub struct BodyReader;
+
+impl Key for BodyReader {
+    type Value = Option<String>;
+}
+
+const DEFAULT_BODY_LIMIT: usize = 1024 * 1024 * 100;
+
+impl<'a> plugin::Plugin<Request<'a>> for BodyReader {
+    type Error = BodyError;
+
+    fn eval(req: &mut Request) -> Result<Option<String>, BodyError> {
+        let need_read = req.headers.get::<headers::ContentType>().map(|header| {
+            match **header {
+                mime::Mime(mime::TopLevel::Multipart, mime::SubLevel::FormData, _) => false,
+                _ => true
+            }
+        }).unwrap_or(false);
+
+        if need_read {
+            let max_length = req.extensions.get::<BodyMaxLength>()
+                .cloned().unwrap_or(DEFAULT_BODY_LIMIT);
+            let body = try!(read_body_as_utf8(req, max_length));
+            Ok(Some(body))
+        } else {
+            Ok(None)
+        }
+    }
+}

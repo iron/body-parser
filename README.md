@@ -1,41 +1,31 @@
 body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?branch=master)](https://travis-ci.org/iron/body-parser)
 ====
 
-> JSON body parsing middleware for the [Iron](https://github.com/iron/iron) web framework.
+> Body parsing middleware for the [Iron](https://github.com/iron/iron) web framework.
 
 ## Example
 
 ```rust
-extern crate iron;
+extern crate iron::prelude::*;
 extern crate bodyparser;
-extern crate serialize;
 
-use std::io::net::ip::Ipv4Addr;
+use iron::status;
 
-use iron::{Iron, Request, Response, IronResult, Plugin, status};
-use bodyparser::BodyParser;
-
-#[deriving(Clone)]
-#[deriving(Decodable)]
-#[deriving(Show)]
-struct MyStructure {
-    A: String,
-    B: Option<String>,
-}
-
-fn log_json(req: &mut Request) -> IronResult<Response> {
-    match req.get::<BodyParser<MyStructure>>() {
-        Some(parsed) => println!("Parsed Json:\n{}", parsed),
-        None => println!("could not parse"),
+fn log_body(req: &mut Request) -> IronResult<Response> {
+    let parsed = req.extensions.get::<bodyparser::BodyKey>();
+    match parsed {
+        Some(body) => println!("Parsed body:\n{}", body),
+        None => println!("Invalid or no body!"),
     }
-    Ok(Response::with(status::Ok, ""))
+    Ok(Response::with(status::Ok))
 }
 
-// With fn main, you now have a running server at port 3000!
-// `curl -i "127.0.0.1:3000/" -H "application/json" -d '{"A":"1","B":"2"}'`
+// `curl -i "localhost:3000/" -H "application/json" -d '{"name":"jason","age":"2"}'`
 // and check out the printed json in your terminal.
 fn main() {
-    Iron::new(log_json).listen(Ipv4Addr(127, 0, 0, 1), 3000);
+    let mut chain = Chain::new(log_body);
+    chain.link_before(bodyparser::BodyReader::new(1024 * 1024 * 10));
+    iron::Iron::new(chain).listen("localhost:3000").unwrap();
 }
 ```
 
@@ -43,8 +33,7 @@ fn main() {
 
 body-parser is a part of Iron's [core bundle](https://github.com/iron/core).
 
-- Perform JSON parsing using native functionality bundled in the standard
-  library. 
+- Perform body parsing to string with limiting.
 
 ## Installation
 

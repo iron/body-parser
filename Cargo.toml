@@ -11,4 +11,6 @@ authors = ["Patrick Tran <patrick.tran06@gmail.com>",
 
 [dependencies]
 iron = "*"
+rustc-serialize = "*"
+plugin = "*"
 
