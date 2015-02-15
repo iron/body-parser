@@ -13,4 +13,5 @@ authors = ["Patrick Tran <patrick.tran06@gmail.com>",
 iron = "*"
 rustc-serialize = "*"
 plugin = "*"
+persistent = "*"
 

@@ -9,12 +9,14 @@
 extern crate iron;
 extern crate "rustc-serialize" as rustc_serialize;
 extern crate plugin;
+extern crate persistent;
 
 use iron::mime;
 use iron::prelude::*;
 use iron::headers;
 use iron::typemap::{Key};
 use std::old_io::ByRefReader;
+use persistent::Read;
 
 pub use self::errors::{BodyError};
 pub use self::limit_reader::{LimitReader};
@@ -41,8 +43,8 @@ fn read_body_as_utf8(req: &mut Request, limit: usize) -> Result<String, errors::
 }
 
 /// Use this key to modify the default body limit.
-pub struct BodyMaxLength;
-impl Key for BodyMaxLength {
+pub struct MaxBodyLength;
+impl Key for MaxBodyLength {
     type Value = usize;
 }
 
@@ -68,8 +70,8 @@ impl<'a> plugin::Plugin<Request<'a>> for BodyReader {
         }).unwrap_or(false);
 
         if need_read {
-            let max_length = req.extensions.get::<BodyMaxLength>()
-                .cloned().unwrap_or(DEFAULT_BODY_LIMIT);
+            let max_length = req.get::<Read<MaxBodyLength>>()
+                .ok().cloned().unwrap_or(DEFAULT_BODY_LIMIT);
             let body = try!(read_body_as_utf8(req, max_length));
             Ok(Some(body))
         } else {
