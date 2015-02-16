@@ -1,50 +1,68 @@
 body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?branch=master)](https://travis-ci.org/iron/body-parser)
 ====
 
-> JSON body parsing middleware for the [Iron](https://github.com/iron/iron) web framework.
+> Body parsing plugins for the [Iron](https://github.com/iron/iron) web framework.
 
 ## Example
 
 ```rust
 extern crate iron;
 extern crate bodyparser;
-extern crate serialize;
+extern crate persistent;
 
-use std::io::net::ip::Ipv4Addr;
+use persistent::Read;
+use iron::status;
+use iron::prelude::*;
 
-use iron::{Iron, Request, Response, IronResult, Plugin, status};
-use bodyparser::BodyParser;
-
-#[deriving(Clone)]
-#[deriving(Decodable)]
-#[deriving(Show)]
+#[derive(Debug, Clone, RustcDecodable)]
 struct MyStructure {
-    A: String,
-    B: Option<String>,
+    a: String,
+    b: Option<String>,
 }
 
-fn log_json(req: &mut Request) -> IronResult<Response> {
-    match req.get::<BodyParser<MyStructure>>() {
-        Some(parsed) => println!("Parsed Json:\n{}", parsed),
-        None => println!("could not parse"),
+fn log_body(req: &mut Request) -> IronResult<Response> {
+    let body = req.get::<bodyparser::Raw>();
+    match body {
+        Ok(Some(body)) => println!("Read body:\n{}", body),
+        Ok(None) => println!("No body"),
+        Err(err) => println!("Error: {:?}", err)
     }
-    Ok(Response::with(status::Ok, ""))
+
+    let json_body = req.get::<bodyparser::Json>();
+    match json_body {
+        Ok(Some(json_body)) => println!("Parsed body:\n{}", json_body),
+        Ok(None) => println!("No body"),
+        Err(err) => println!("Error: {:?}", err)
+    }
+
+    let struct_body = req.get::<bodyparser::Struct<MyStructure>>();
+    match struct_body {
+        Ok(Some(struct_body)) => println!("Parsed body:\n{:?}", struct_body),
+        Ok(None) => println!("No body"),
+        Err(err) => println!("Error: {:?}", err)
+    }
+
+    Ok(Response::with(status::Ok))
 }
 
-// With fn main, you now have a running server at port 3000!
-// `curl -i "127.0.0.1:3000/" -H "application/json" -d '{"A":"1","B":"2"}'`
+const MAX_BODY_LENGTH: usize = 1024 * 1024 * 10;
+
+// `curl -i "localhost:3000/" -H "application/json" -d '{"name":"jason","age":"2"}'`
 // and check out the printed json in your terminal.
 fn main() {
-    Iron::new(log_json).listen(Ipv4Addr(127, 0, 0, 1), 3000);
+    let mut chain = Chain::new(log_body);
+    chain.link_before(Read::<bodyparser::MaxBodyLength>::one(MAX_BODY_LENGTH));
+    Iron::new(chain).listen("localhost:3000").unwrap();
 }
 ```
 
 ## Overview
 
-body-parser is a part of Iron's [core bundle](https://github.com/iron/core).
+body-parser is a part of Iron's [core bundle](https://github.com/iron/core). It contains:
 
-- Perform JSON parsing using native functionality bundled in the standard
-  library. 
+* **Raw** - performs body parsing to string with limiting.
+* **Json** - parses body into Json.
+* **Struct** - parses body into a struct using Decode.
 
 ## Installation
 
