@@ -14,4 +14,3 @@ iron = "*"
 rustc-serialize = "*"
 plugin = "*"
 persistent = "*"
-

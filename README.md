@@ -1,7 +1,7 @@
 body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?branch=master)](https://travis-ci.org/iron/body-parser)
 ====
 
-> Body parsing middleware for the [Iron](https://github.com/iron/iron) web framework.
+> Body parsing plugins for the [Iron](https://github.com/iron/iron) web framework.
 
 ## Example
 
@@ -14,13 +14,34 @@ use persistent::Read;
 use iron::status;
 use iron::prelude::*;
 
+#[derive(Debug, Clone, RustcDecodable)]
+struct MyStructure {
+    a: String,
+    b: Option<String>,
+}
+
 fn log_body(req: &mut Request) -> IronResult<Response> {
-    let parsed = req.get::<bodyparser::BodyReader>();
-    match parsed {
-        Ok(Some(body)) => println!("Parsed body:\n{}", body),
+    let body = req.get::<bodyparser::Raw>();
+    match body {
+        Ok(Some(body)) => println!("Read body:\n{}", body),
         Ok(None) => println!("No body"),
         Err(err) => println!("Error: {:?}", err)
     }
+
+    let json_body = req.get::<bodyparser::Json>();
+    match json_body {
+        Ok(Some(json_body)) => println!("Parsed body:\n{}", json_body),
+        Ok(None) => println!("No body"),
+        Err(err) => println!("Error: {:?}", err)
+    }
+
+    let struct_body = req.get::<bodyparser::Struct<MyStructure>>();
+    match struct_body {
+        Ok(Some(struct_body)) => println!("Parsed body:\n{:?}", struct_body),
+        Ok(None) => println!("No body"),
+        Err(err) => println!("Error: {:?}", err)
+    }
+
     Ok(Response::with(status::Ok))
 }
 
@@ -37,9 +58,11 @@ fn main() {
 
 ## Overview
 
-body-parser is a part of Iron's [core bundle](https://github.com/iron/core).
+body-parser is a part of Iron's [core bundle](https://github.com/iron/core). It contains:
 
-- Perform body parsing to string with limiting.
+* **Raw** - performs body parsing to string with limiting.
+* **Json** - parses body into Json.
+* **Struct** - parses body into a struct using Decode.
 
 ## Installation
 
