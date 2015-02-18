@@ -78,7 +78,7 @@ Otherwise, `cargo build`, and the rlib will be in your `target` directory.
 
 ## [Documentation](http://docs.ironframework.io/bodyparser)
 
-Along with the [online documentation](http://docs.ironframework.io/bodyparser),
+Along with the [online documentation](http://ironframework.io/doc/bodyparser/index.html),
 you can build a local copy with `make doc`.
 
 ## [Examples](/examples)
