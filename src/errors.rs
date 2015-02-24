@@ -20,7 +20,7 @@ pub struct BodyError {
 
 impl StdError for BodyError {
     fn description(&self) -> &str {
-        &self.detail[]
+        &self.detail[..]
     }
 }
 
