@@ -45,6 +45,6 @@ const MAX_BODY_LENGTH: usize = 1024 * 1024 * 10;
 fn main() {
     let mut chain = Chain::new(log_body);
     chain.link_before(Read::<bodyparser::MaxBodyLength>::one(MAX_BODY_LENGTH));
-    Iron::new(chain).listen("localhost:3000").unwrap();
+    Iron::new(chain).http("localhost:3000").unwrap();
 }
 

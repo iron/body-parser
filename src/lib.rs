@@ -1,5 +1,5 @@
 #![crate_name = "bodyparser"]
-#![feature(core, io)]
+#![feature(core, old_io)]
 
 //! Body Parser Plugin for Iron
 //!
@@ -16,6 +16,7 @@ use iron::mime;
 use iron::prelude::*;
 use iron::headers;
 use iron::typemap::{Key};
+use std::marker;
 use std::old_io::ByRefReader;
 use persistent::Read;
 
@@ -109,7 +110,9 @@ impl<'a> plugin::Plugin<Request<'a>> for Json {
 /// Struct is a plugin to parse a request body into a struct.
 /// Uses Raw plugin to parse the body with limit.
 #[derive(Clone)]
-pub struct Struct<T: Decodable>;
+pub struct Struct<T: Decodable> {
+    marker: marker::PhantomData<T>
+}
 impl<T: 'static + Decodable> Key for Struct<T> {
     type Value = Option<T>;
 }
