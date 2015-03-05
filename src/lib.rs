@@ -1,5 +1,5 @@
 #![crate_name = "bodyparser"]
-#![feature(core, old_io)]
+#![feature(core, io)]
 
 //! Body Parser Plugin for Iron
 //!
@@ -16,9 +16,8 @@ use iron::mime;
 use iron::prelude::*;
 use iron::headers;
 use iron::typemap::{Key};
+use std::io::{ReadExt, Read};
 use std::marker;
-use std::old_io::ByRefReader;
-use persistent::Read;
 
 pub use self::errors::{BodyError, BodyErrorCause};
 pub use self::limit_reader::{LimitReader};
@@ -27,8 +26,9 @@ mod errors;
 mod limit_reader;
 
 fn read_body_as_utf8(req: &mut Request, limit: usize) -> Result<String, errors::BodyError> {
-    match LimitReader::new(req.body.by_ref(), limit).read_to_end() {
-        Ok(bytes) => {
+    let mut bytes = Vec::new();
+    match LimitReader::new(req.body.by_ref(), limit).read_to_end(&mut bytes) {
+        Ok(_) => {
              match String::from_utf8(bytes) {
                 Ok(e) => Ok(e),
                 Err(err) => Err(errors::BodyError {
@@ -72,7 +72,7 @@ impl<'a> plugin::Plugin<Request<'a>> for Raw {
         }).unwrap_or(false);
 
         if need_read {
-            let max_length = req.get::<Read<MaxBodyLength>>()
+            let max_length = req.get::<persistent::Read<MaxBodyLength>>()
                 .ok().cloned().unwrap_or(DEFAULT_BODY_LIMIT);
             let body = try!(read_body_as_utf8(req, max_length));
             Ok(Some(body))
