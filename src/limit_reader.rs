@@ -1,4 +1,4 @@
-use std::old_io;
+use std::io;
 use std::cmp;
 
 /// [Original impl](https://github.com/rust-lang/rust/blob/17bc7d8d5be3be9674d702ccad2fa88c487d23b0/src/libstd/old_io/util.rs#L20)
@@ -12,7 +12,7 @@ pub struct LimitReader<R> {
     inner: R
 }
 
-impl<R: Reader> LimitReader<R> {
+impl<R: io::Read> LimitReader<R> {
     pub fn new(r: R, limit: usize) -> LimitReader<R> {
         LimitReader { limit: limit, inner: r }
     }
@@ -21,15 +21,12 @@ impl<R: Reader> LimitReader<R> {
     pub fn limit(&self) -> usize { self.limit }
 }
 
-impl<R: Reader> Reader for LimitReader<R> {
-    fn read(&mut self, buf: &mut [u8]) -> old_io::IoResult<usize> {
+impl<R: io::Read> io::Read for LimitReader<R> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         if self.limit == 0 {
             // Changed code is here
-            return Err(old_io::IoError {
-                kind: old_io::IoErrorKind::InvalidInput,
-                desc: "Body is too big",
-                detail: None
-            })
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput, "Body is too big", None))
         }
 
         let len = cmp::min(self.limit, buf.len());

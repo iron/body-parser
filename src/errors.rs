@@ -1,13 +1,13 @@
 use std::error::Error as StdError;
 use std::fmt;
-use std::old_io;
+use std::io;
 use std::str;
 use rustc_serialize::json;
 
 #[derive(Debug, Clone)]
 pub enum BodyErrorCause {
     Utf8Error(str::Utf8Error),
-    IoError(old_io::IoError),
+    IoError(io::Error),
     ParserError(json::ParserError),
     DecoderError(json::DecoderError)
 }
