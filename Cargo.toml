@@ -1,7 +1,7 @@
 [package]
 
 name = "bodyparser"
-version = "0.0.2"
+version = "0.0.3"
 license = "MIT"
 description = "Body parsing middleware for Iron."
 repository = "https://github.com/iron/body-parser"
