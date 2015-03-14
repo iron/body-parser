@@ -16,7 +16,7 @@ use iron::mime;
 use iron::prelude::*;
 use iron::headers;
 use iron::typemap::{Key};
-use std::io::{ReadExt, Read};
+use std::io::Read;
 use std::marker;
 
 pub use self::errors::{BodyError, BodyErrorCause};
