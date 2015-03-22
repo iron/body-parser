@@ -60,7 +60,7 @@ impl Key for Raw {
 
 const DEFAULT_BODY_LIMIT: usize = 1024 * 1024 * 100;
 
-impl<'a> plugin::Plugin<Request<'a>> for Raw {
+impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Raw {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<String>, BodyError> {
@@ -90,7 +90,7 @@ impl Key for Json {
     type Value = Option<json::Json>;
 }
 
-impl<'a> plugin::Plugin<Request<'a>> for Json {
+impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<json::Json>, BodyError> {
@@ -117,7 +117,7 @@ impl<T: 'static + Decodable> Key for Struct<T> {
     type Value = Option<T>;
 }
 
-impl<'a, T: 'static + Decodable> plugin::Plugin<Request<'a>> for Struct<T> {
+impl<'a, 'b, T: 'static + Decodable> plugin::Plugin<Request<'a, 'b>> for Struct<T> {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<T>, BodyError> {
