@@ -6,7 +6,7 @@
 //! This plugin parses JSON out of an incoming Request.
 
 extern crate iron;
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 extern crate plugin;
 extern crate persistent;
 
@@ -113,11 +113,12 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
 pub struct Struct<T: Decodable> {
     marker: marker::PhantomData<T>
 }
-impl<T: 'static + Decodable> Key for Struct<T> {
+impl<T> Key for Struct<T> where T: 'static + Decodable + marker::Reflect {
     type Value = Option<T>;
 }
 
-impl<'a, 'b, T: 'static + Decodable> plugin::Plugin<Request<'a, 'b>> for Struct<T> {
+impl<'a, 'b, T> plugin::Plugin<Request<'a, 'b>> for Struct<T>
+where T: 'static + Decodable + marker::Reflect {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<T>, BodyError> {
