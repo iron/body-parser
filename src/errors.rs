@@ -1,10 +1,11 @@
 use std::error::Error as StdError;
 use std::fmt;
 use std::io;
+use std::sync;
 use std::str;
 use rustc_serialize::json;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum BodyErrorCause {
     Utf8Error(str::Utf8Error),
     IoError(io::Error),
@@ -15,7 +16,7 @@ pub enum BodyErrorCause {
 #[derive(Debug, Clone)]
 pub struct BodyError {
     pub detail: String,
-    pub cause: BodyErrorCause
+    pub cause: sync::Arc<BodyErrorCause>
 }
 
 impl StdError for BodyError {

@@ -26,7 +26,7 @@ impl<R: io::Read> io::Read for LimitReader<R> {
         if self.limit == 0 {
             // Changed code is here
             return Err(io::Error::new(
-                io::ErrorKind::InvalidInput, "Body is too big", None))
+                io::ErrorKind::InvalidInput, "Body is too big"))
         }
 
         let len = cmp::min(self.limit, buf.len());

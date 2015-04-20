@@ -1,12 +1,12 @@
 #![crate_name = "bodyparser"]
-#![feature(core, io)]
+#![feature(core)]
 
 //! Body Parser Plugin for Iron
 //!
 //! This plugin parses JSON out of an incoming Request.
 
 extern crate iron;
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 extern crate plugin;
 extern crate persistent;
 
@@ -18,6 +18,7 @@ use iron::headers;
 use iron::typemap::{Key};
 use std::io::Read;
 use std::marker;
+use std::sync;
 
 pub use self::errors::{BodyError, BodyErrorCause};
 pub use self::limit_reader::{LimitReader};
@@ -33,13 +34,13 @@ fn read_body_as_utf8(req: &mut Request, limit: usize) -> Result<String, errors::
                 Ok(e) => Ok(e),
                 Err(err) => Err(errors::BodyError {
                     detail: "Invalid UTF-8 sequence".to_string(),
-                    cause: errors::BodyErrorCause::Utf8Error(err.utf8_error())
+                    cause: sync::Arc::new(errors::BodyErrorCause::Utf8Error(err.utf8_error()))
                 })
             }
         },
         Err(err) => Err(errors::BodyError {
             detail: "Can't read request body".to_string(),
-            cause: errors::BodyErrorCause::IoError(err)
+            cause: sync::Arc::new(errors::BodyErrorCause::IoError(err))
         })
     }
 }
@@ -73,7 +74,7 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Raw {
 
         if need_read {
             let max_length = req.get::<persistent::Read<MaxBodyLength>>()
-                .ok().cloned().unwrap_or(DEFAULT_BODY_LIMIT);
+                .ok().map(|v| (*v).clone()).unwrap_or(DEFAULT_BODY_LIMIT);
             let body = try!(read_body_as_utf8(req, max_length));
             Ok(Some(body))
         } else {
@@ -100,7 +101,7 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
                     .map_err(|err| {
                         BodyError {
                             detail: "Can't parse body to JSON".to_string(),
-                            cause: BodyErrorCause::ParserError(err)
+                            cause: sync::Arc::new(BodyErrorCause::ParserError(err))
                         }
                     })
             })
@@ -113,11 +114,11 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
 pub struct Struct<T: Decodable> {
     marker: marker::PhantomData<T>
 }
-impl<T: 'static + Decodable> Key for Struct<T> {
+impl<T: 'static + Decodable + marker::Reflect> Key for Struct<T> {
     type Value = Option<T>;
 }
 
-impl<'a, 'b, T: 'static + Decodable> plugin::Plugin<Request<'a, 'b>> for Struct<T> {
+impl<'a, 'b, T: 'static + Decodable + marker::Reflect> plugin::Plugin<Request<'a, 'b>> for Struct<T> {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<T>, BodyError> {
@@ -126,7 +127,7 @@ impl<'a, 'b, T: 'static + Decodable> plugin::Plugin<Request<'a, 'b>> for Struct<
                 reverse_option(maybe_body.map(|body| Decodable::decode(&mut json::Decoder::new(body))))
                     .map_err(|err| BodyError {
                         detail: "Can't parse body to the struct".to_string(),
-                        cause: BodyErrorCause::DecoderError(err)
+                        cause: sync::Arc::new(BodyErrorCause::DecoderError(err))
                     })
             })
     }
