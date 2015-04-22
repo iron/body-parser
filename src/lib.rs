@@ -1,5 +1,4 @@
 #![crate_name = "bodyparser"]
-#![feature(core, io)]
 
 //! Body Parser Plugin for Iron
 //!
