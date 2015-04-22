@@ -1,7 +1,7 @@
 extern crate iron;
 extern crate bodyparser;
 extern crate persistent;
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 
 use persistent::Read;
 use iron::status;
