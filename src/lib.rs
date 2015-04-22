@@ -17,6 +17,7 @@ use iron::prelude::*;
 use iron::headers;
 use iron::typemap::{Key};
 use std::io::Read;
+use std::any::Any;
 use std::marker;
 
 pub use self::errors::{BodyError, BodyErrorCause};
@@ -73,8 +74,8 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Raw {
 
         if need_read {
             let max_length = req.get::<persistent::Read<MaxBodyLength>>()
-                .ok().cloned().unwrap_or(DEFAULT_BODY_LIMIT);
-            let body = try!(read_body_as_utf8(req, max_length));
+                .ok().unwrap_or(std::sync::Arc::new(DEFAULT_BODY_LIMIT));
+            let body = try!(read_body_as_utf8(req, *max_length));
             Ok(Some(body))
         } else {
             Ok(None)
@@ -109,15 +110,15 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
 
 /// Struct is a plugin to parse a request body into a struct.
 /// Uses Raw plugin to parse the body with limit.
-#[derive(Clone)]
 pub struct Struct<T: Decodable> {
     marker: marker::PhantomData<T>
 }
-impl<T: 'static + Decodable> Key for Struct<T> {
+impl<T> Key for Struct<T> where T: Decodable + Any {
     type Value = Option<T>;
 }
 
-impl<'a, 'b, T: 'static + Decodable> plugin::Plugin<Request<'a, 'b>> for Struct<T> {
+impl<'a, 'b, T> plugin::Plugin<Request<'a, 'b>> for Struct<T>
+where T: Decodable + Any {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<T>, BodyError> {

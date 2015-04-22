@@ -4,7 +4,7 @@ use std::io;
 use std::str;
 use rustc_serialize::json;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum BodyErrorCause {
     Utf8Error(str::Utf8Error),
     IoError(io::Error),
@@ -12,7 +12,7 @@ pub enum BodyErrorCause {
     DecoderError(json::DecoderError)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct BodyError {
     pub detail: String,
     pub cause: BodyErrorCause
