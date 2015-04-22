@@ -6,7 +6,7 @@
 //! This plugin parses JSON out of an incoming Request.
 
 extern crate iron;
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 extern crate plugin;
 extern crate persistent;
 
