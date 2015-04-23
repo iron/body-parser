@@ -72,9 +72,13 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Raw {
         }).unwrap_or(false);
 
         if need_read {
-            let max_length = req.get::<persistent::Read<MaxBodyLength>>()
-                .ok().unwrap_or(std::sync::Arc::new(DEFAULT_BODY_LIMIT));
-            let body = try!(read_body_as_utf8(req, *max_length));
+            let max_length = req
+                .get::<persistent::Read<MaxBodyLength>>()
+                .ok()
+                .map(|x| *x)
+                .unwrap_or(DEFAULT_BODY_LIMIT);
+
+            let body = try!(read_body_as_utf8(req, max_length));
             Ok(Some(body))
         } else {
             Ok(None)
