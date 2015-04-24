@@ -24,9 +24,8 @@ impl<R: io::Read> LimitReader<R> {
 impl<R: io::Read> io::Read for LimitReader<R> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         if self.limit == 0 {
-            // Changed code is here
             return Err(io::Error::new(
-                io::ErrorKind::InvalidInput, "Body is too big", None))
+                io::ErrorKind::InvalidInput, "Body is too big"))
         }
 
         let len = cmp::min(self.limit, buf.len());

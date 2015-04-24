@@ -1,12 +1,11 @@
 #![crate_name = "bodyparser"]
-#![feature(core, io)]
 
 //! Body Parser Plugin for Iron
 //!
 //! This plugin parses JSON out of an incoming Request.
 
 extern crate iron;
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 extern crate plugin;
 extern crate persistent;
 
@@ -17,6 +16,7 @@ use iron::prelude::*;
 use iron::headers;
 use iron::typemap::{Key};
 use std::io::Read;
+use std::any::Any;
 use std::marker;
 
 pub use self::errors::{BodyError, BodyErrorCause};
@@ -72,8 +72,12 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Raw {
         }).unwrap_or(false);
 
         if need_read {
-            let max_length = req.get::<persistent::Read<MaxBodyLength>>()
-                .ok().cloned().unwrap_or(DEFAULT_BODY_LIMIT);
+            let max_length = req
+                .get::<persistent::Read<MaxBodyLength>>()
+                .ok()
+                .map(|x| *x)
+                .unwrap_or(DEFAULT_BODY_LIMIT);
+
             let body = try!(read_body_as_utf8(req, max_length));
             Ok(Some(body))
         } else {
@@ -109,15 +113,15 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
 
 /// Struct is a plugin to parse a request body into a struct.
 /// Uses Raw plugin to parse the body with limit.
-#[derive(Clone)]
 pub struct Struct<T: Decodable> {
     marker: marker::PhantomData<T>
 }
-impl<T: 'static + Decodable> Key for Struct<T> {
+impl<T> Key for Struct<T> where T: Decodable + Any {
     type Value = Option<T>;
 }
 
-impl<'a, 'b, T: 'static + Decodable> plugin::Plugin<Request<'a, 'b>> for Struct<T> {
+impl<'a, 'b, T> plugin::Plugin<Request<'a, 'b>> for Struct<T>
+where T: Decodable + Any {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<T>, BodyError> {
