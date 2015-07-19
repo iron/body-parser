@@ -8,6 +8,7 @@ repository = "https://github.com/iron/body-parser"
 documentation = "http://ironframework.io/doc/bodyparser/index.html"
 authors = ["Patrick Tran <patrick.tran06@gmail.com>",
            "Jonathan Reem <jonathan.reem@gmail.com>"]
+keywords = ["iron", "web", "http", "parsing", "parser"]
 
 [dependencies]
 iron = "*"
