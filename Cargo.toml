@@ -11,7 +11,7 @@ authors = ["Patrick Tran <patrick.tran06@gmail.com>",
 keywords = ["iron", "web", "http", "parsing", "parser"]
 
 [dependencies]
-iron = "*"
-rustc-serialize = "*"
-plugin = "*"
-persistent = "*"
+iron = { version = "0.2", default-features = false }
+rustc-serialize = "0.3"
+plugin = "0.2"
+persistent = "0"
