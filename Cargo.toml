@@ -12,6 +12,7 @@ keywords = ["iron", "web", "http", "parsing", "parser"]
 
 [dependencies]
 iron = { version = "0.2", default-features = false }
-rustc-serialize = "0.3"
 plugin = "0.2"
 persistent = "0"
+serde = "0.6.11"
+serde_json = "0.6.0"
