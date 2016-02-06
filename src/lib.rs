@@ -5,11 +5,13 @@
 //! This plugin parses JSON out of an incoming Request.
 
 extern crate iron;
-extern crate rustc_serialize;
 extern crate plugin;
 extern crate persistent;
+extern crate serde;
+extern crate serde_json;
 
-use rustc_serialize::{json, Decodable};
+use serde::Deserialize;
+use serde_json::{from_str, from_value};
 
 use iron::mime;
 use iron::prelude::*;
@@ -91,20 +93,20 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Raw {
 #[derive(Clone)]
 pub struct Json;
 impl Key for Json {
-    type Value = Option<json::Json>;
+    type Value = Option<serde_json::Value>;
 }
 
 impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
     type Error = BodyError;
 
-    fn eval(req: &mut Request) -> Result<Option<json::Json>, BodyError> {
+    fn eval(req: &mut Request) -> Result<Option<serde_json::Value>, BodyError> {
         req.get::<Raw>()
             .and_then(|maybe_body| {
-                reverse_option(maybe_body.map(|body| body.parse()))
+                reverse_option(maybe_body.map(|body| from_str(&body)))
                     .map_err(|err| {
                         BodyError {
                             detail: "Can't parse body to JSON".to_string(),
-                            cause: BodyErrorCause::ParserError(err)
+                            cause: BodyErrorCause::JsonError(err)
                         }
                     })
             })
@@ -113,24 +115,24 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
 
 /// Struct is a plugin to parse a request body into a struct.
 /// Uses Raw plugin to parse the body with limit.
-pub struct Struct<T: Decodable> {
+pub struct Struct<T: Deserialize> {
     marker: marker::PhantomData<T>
 }
-impl<T> Key for Struct<T> where T: Decodable + Any {
+impl<T> Key for Struct<T> where T: Deserialize + Any {
     type Value = Option<T>;
 }
 
 impl<'a, 'b, T> plugin::Plugin<Request<'a, 'b>> for Struct<T>
-where T: Decodable + Any {
+where T: Deserialize + Any {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<T>, BodyError> {
         req.get::<Json>()
             .and_then(|maybe_body| {
-                reverse_option(maybe_body.map(|body| Decodable::decode(&mut json::Decoder::new(body))))
+                reverse_option(maybe_body.map(|body| from_value(body)))
                     .map_err(|err| BodyError {
                         detail: "Can't parse body to the struct".to_string(),
-                        cause: BodyErrorCause::DecoderError(err)
+                        cause: BodyErrorCause::JsonError(err)
                     })
             })
     }

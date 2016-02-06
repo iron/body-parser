@@ -14,7 +14,9 @@ use persistent::Read;
 use iron::status;
 use iron::prelude::*;
 
-#[derive(Debug, Clone, RustcDecodable)]
+// Automatically deriving from `Deserialize` requires serde_macros or serde_codegen + syntex.
+// See https://github.com/serde-rs/serde for details.
+#[derive(Debug, Clone, Deserialize)]
 struct MyStructure {
     a: String,
     b: Option<String>,
@@ -30,7 +32,7 @@ fn log_body(req: &mut Request) -> IronResult<Response> {
 
     let json_body = req.get::<bodyparser::Json>();
     match json_body {
-        Ok(Some(json_body)) => println!("Parsed body:\n{}", json_body),
+        Ok(Some(json_body)) => println!("Parsed body:\n{:?}", json_body),
         Ok(None) => println!("No body"),
         Err(err) => println!("Error: {:?}", err)
     }
@@ -47,12 +49,16 @@ fn log_body(req: &mut Request) -> IronResult<Response> {
 
 const MAX_BODY_LENGTH: usize = 1024 * 1024 * 10;
 
+// While the example is running, try the following curl commands and see how they are
+// logged by the Rust server process:
+//
 // `curl -i "localhost:3000/" -H "application/json" -d '{"name":"jason","age":"2"}'`
-// and check out the printed json in your terminal.
+// `curl -i "localhost:3000/" -H "application/json" -d '{"a":"jason","b":"2"}'`
+// `curl -i "localhost:3000/" -H "application/json" -d '{"a":"jason"}'`
 fn main() {
     let mut chain = Chain::new(log_body);
     chain.link_before(Read::<bodyparser::MaxBodyLength>::one(MAX_BODY_LENGTH));
-    Iron::new(chain).listen("localhost:3000").unwrap();
+    Iron::new(chain).http("localhost:3000").unwrap();
 }
 ```
 
@@ -62,7 +68,7 @@ body-parser is a part of Iron's [core bundle](https://github.com/iron/core). It 
 
 * **Raw** - performs body parsing to string with limiting.
 * **Json** - parses body into Json.
-* **Struct** - parses body into a struct using Decode.
+* **Struct** - parses body into a struct using Serde.
 
 ## Installation
 
