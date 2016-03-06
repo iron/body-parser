@@ -14,5 +14,5 @@ keywords = ["iron", "web", "http", "parsing", "parser"]
 iron = { version = "0.2", default-features = false }
 plugin = "0.2"
 persistent = "0"
-serde = "0.6.11"
-serde_json = "0.6.0"
+serde = "0.7"
+serde_json = "0.7"
