@@ -27,7 +27,7 @@ impl Deserialize for MyStructure {
     {
         static FIELDS: &'static [&'static str] = &["a", "b"];
 
-        deserializer.visit_struct("MyStructure", FIELDS, MyStructureVisitor)
+        deserializer.deserialize_struct("MyStructure", FIELDS, MyStructureVisitor)
     }
 }
 
@@ -93,12 +93,12 @@ impl Deserialize for MyStructureField {
                 match value {
                     "a" => Ok(MyStructureField::A),
                     "b" => Ok(MyStructureField::B),
-                    _ => Err(serde::de::Error::syntax("expected a or b")),
+                    _ => Err(serde::de::Error::custom("expected a or b")),
                 }
             }
         }
 
-        deserializer.visit(MyStructureFieldVisitor)
+        deserializer.deserialize(MyStructureFieldVisitor)
     }
 }
 
