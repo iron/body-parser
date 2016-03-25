@@ -11,8 +11,8 @@ authors = ["Patrick Tran <patrick.tran06@gmail.com>",
 keywords = ["iron", "web", "http", "parsing", "parser"]
 
 [dependencies]
-iron = { version = "0.2", default-features = false }
+iron = "0.3"
 plugin = "0.2"
-persistent = "0"
+persistent = "0.1"
 serde = "0.7"
 serde_json = "0.7"
