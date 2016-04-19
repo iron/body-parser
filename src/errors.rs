@@ -22,6 +22,16 @@ impl StdError for BodyError {
     fn description(&self) -> &str {
         &self.detail[..]
     }
+
+    fn cause(&self) -> Option<&StdError> {
+        use BodyErrorCause::*;
+
+        match self.cause {
+            Utf8Error(ref err) => Some(err),
+            IoError(ref err) => Some(err),
+            JsonError(ref err) => Some(err),
+        }
+    }
 }
 
 impl fmt::Display for BodyError {
