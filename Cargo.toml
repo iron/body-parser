@@ -11,7 +11,7 @@ authors = ["Patrick Tran <patrick.tran06@gmail.com>",
 keywords = ["iron", "web", "http", "parsing", "parser"]
 
 [dependencies]
-iron = "0.3"
+iron = "0.4"
 plugin = "0.2"
 persistent = "0.1"
 serde = "0.7"
