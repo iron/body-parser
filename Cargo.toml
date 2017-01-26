@@ -14,5 +14,8 @@ keywords = ["iron", "web", "http", "parsing", "parser"]
 iron = "0.5"
 plugin = "0.2"
 persistent = "0.3"
-serde = "0.8"
-serde_json = "0.8"
+serde = "0.9"
+serde_json = "0.9"
+
+[dev-dependencies]
+serde_derive = "0.9"
