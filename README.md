@@ -9,13 +9,13 @@ body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?b
 extern crate iron;
 extern crate bodyparser;
 extern crate persistent;
+#[macro_use]
+extern crate serde_derive;
 
 use persistent::Read;
 use iron::status;
 use iron::prelude::*;
 
-// Automatically deriving from `Deserialize` requires serde_macros or serde_codegen + syntex.
-// See https://github.com/serde-rs/serde for details.
 #[derive(Debug, Clone, Deserialize)]
 struct MyStructure {
     a: String,
