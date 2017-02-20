@@ -7,5 +7,5 @@ sudo: false
 env:
   global:
     secure: MFJHBZPW7DNtZ+lNRZU6g/l5T0Khc2J0kbQj7BZ/QtdyGLhkW4XcrS8lJ5Fbm/i96hc2sX+MXbrWRYDkuyE6u5dgIXIFL4X+KzAf19JpIBWfeRnZKL9b8/lOB7PN0WqPP0wNmB7mBi/2rgz31wt8yGU6pnk2UiWlHX77sT14PWE=
-after_success: 'curl https://raw.githubusercontent.com/iron-bot/build-doc/master/build-doc.sh
+after_success: 'curl https://raw.githubusercontent.com/iron/build-doc/master/build-doc.sh
   | sh '
