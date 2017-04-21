@@ -115,15 +115,15 @@ impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
 
 /// Struct is a plugin to parse a request body into a struct.
 /// Uses Raw plugin to parse the body with limit.
-pub struct Struct<T: Deserialize> {
+pub struct Struct<T> where T: for<'a> Deserialize<'a> {
     marker: marker::PhantomData<T>
 }
-impl<T> Key for Struct<T> where T: Deserialize + Any {
+impl<T> Key for Struct<T> where T: for<'a> Deserialize<'a> + Any {
     type Value = Option<T>;
 }
 
 impl<'a, 'b, T> plugin::Plugin<Request<'a, 'b>> for Struct<T>
-where T: Deserialize + Any {
+where T: for<'c> Deserialize<'c> + Any {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<T>, BodyError> {
