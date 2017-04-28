@@ -1,5 +1,8 @@
-body-parser [![Build Status](https://secure.travis-ci.org/iron/body-parser.png?branch=master)](https://travis-ci.org/iron/body-parser)
+body-parser
 ====
+
+[![Build Status](https://secure.travis-ci.org/iron/body-parser.png?branch=master)](https://travis-ci.org/iron/body-parser)
+[![Crates.io](https://img.shields.io/crates/v/bodyparser.svg)](https://crates.io/crates/bodyparser)
 
 > Body parsing plugins for the [Iron](https://github.com/iron/iron) web framework.
 
