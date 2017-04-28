@@ -5,7 +5,7 @@ version = "0.7.0"
 license = "MIT"
 description = "Body parsing middleware for Iron."
 repository = "https://github.com/iron/body-parser"
-documentation = "http://ironframework.io/doc/bodyparser/index.html"
+documentation = "https://docs.rs/bodyparser/"
 authors = ["Patrick Tran <patrick.tran06@gmail.com>",
            "Jonathan Reem <jonathan.reem@gmail.com>"]
 keywords = ["iron", "web", "http", "parsing", "parser"]
