@@ -13,7 +13,7 @@ keywords = ["iron", "web", "http", "parsing", "parser"]
 [dependencies]
 iron = "0.6"
 plugin = "0.2"
-persistent = "0.3"
+persistent = "0.4"
 serde = "1.0"
 serde_json = "1.0"
 
