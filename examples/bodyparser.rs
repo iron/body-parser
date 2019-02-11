@@ -6,7 +6,7 @@ extern crate serde;
 extern crate serde_derive;
 
 use persistent::Read;
-use iron::status;
+use iron::StatusCode;
 use iron::prelude::*;
 
 #[derive(Deserialize, Debug, Clone)]
@@ -37,7 +37,7 @@ fn log_body(req: &mut Request) -> IronResult<Response> {
         Err(err) => println!("Error: {:?}", err)
     }
 
-    Ok(Response::with(status::Ok))
+    Ok(Response::with(StatusCode::OK))
 }
 
 const MAX_BODY_LENGTH: usize = 1024 * 1024 * 10;
@@ -51,5 +51,5 @@ const MAX_BODY_LENGTH: usize = 1024 * 1024 * 10;
 fn main() {
     let mut chain = Chain::new(log_body);
     chain.link_before(Read::<bodyparser::MaxBodyLength>::one(MAX_BODY_LENGTH));
-    Iron::new(chain).http("localhost:3000").unwrap();
+    Iron::new(chain).http("localhost:3000");
 }

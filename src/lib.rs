@@ -17,21 +17,19 @@ use iron::mime;
 use iron::prelude::*;
 use iron::headers;
 use iron::typemap::{Key};
-use std::io::Read;
 use std::any::Any;
 use std::marker;
 
 pub use self::errors::{BodyError, BodyErrorCause};
-pub use self::limit_reader::{LimitReader};
 
 mod errors;
-mod limit_reader;
 
-fn read_body_as_utf8(req: &mut Request, limit: usize) -> Result<String, errors::BodyError> {
-    let mut bytes = Vec::new();
-    match LimitReader::new(req.body.by_ref(), limit).read_to_end(&mut bytes) {
-        Ok(_) => {
-             match String::from_utf8(bytes) {
+/// This implementation currently ignores the limit parameter, since irons
+/// request::get_body_contents() reads the data unlimited.
+fn read_body_as_utf8(req: &mut Request, _limit: usize) -> Result<String, errors::BodyError> {
+    match req.get_body_contents() {
+        Ok(bytes) => {
+             match String::from_utf8(bytes.to_vec()) {
                 Ok(e) => Ok(e),
                 Err(err) => Err(errors::BodyError {
                     detail: "Invalid UTF-8 sequence".to_string(),
@@ -62,15 +60,13 @@ impl Key for Raw {
 
 const DEFAULT_BODY_LIMIT: usize = 1024 * 1024 * 100;
 
-impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Raw {
+impl plugin::Plugin<Request> for Raw {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<String>, BodyError> {
-        let need_read = req.headers.get::<headers::ContentType>().map(|header| {
-            match **header {
-                mime::Mime(mime::TopLevel::Multipart, mime::SubLevel::FormData, _) => false,
-                _ => true
-            }
+        let need_read = req.headers.get(headers::CONTENT_TYPE).map(|header| {
+            header.to_str().unwrap().parse::<mime::Mime>().unwrap()
+                != "multipart/form-data".parse::<mime::Mime>().unwrap()
         }).unwrap_or(false);
 
         if need_read {
@@ -96,7 +92,7 @@ impl Key for Json {
     type Value = Option<serde_json::Value>;
 }
 
-impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for Json {
+impl plugin::Plugin<Request> for Json {
     type Error = BodyError;
 
     fn eval(req: &mut Request) -> Result<Option<serde_json::Value>, BodyError> {
@@ -122,7 +118,7 @@ impl<T> Key for Struct<T> where T: for<'a> Deserialize<'a> + Any {
     type Value = Option<T>;
 }
 
-impl<'a, 'b, T> plugin::Plugin<Request<'a, 'b>> for Struct<T>
+impl<T> plugin::Plugin<Request> for Struct<T>
 where T: for<'c> Deserialize<'c> + Any {
     type Error = BodyError;
 
