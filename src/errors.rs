@@ -1,6 +1,5 @@
 use std::error::Error as StdError;
 use std::fmt;
-use std::io;
 use std::str;
 
 use serde_json;
@@ -8,7 +7,7 @@ use serde_json;
 #[derive(Debug)]
 pub enum BodyErrorCause {
     Utf8Error(str::Utf8Error),
-    IoError(io::Error),
+    IoError(iron::error::HttpError),
     JsonError(serde_json::Error),
 }
 
